@@ -12,7 +12,23 @@ class Transport
 
 class TransportModel
 {
+	hidden var notify;
 
+	function initialize(handler)
+	{
+		Position.enableLocationEvents(Position.LOCATION_ONE_SHOT, method(:onPosition));
+		notify = handler;
+	}
+
+ 	function onPosition(info)
+ 	{
+ 		var latLon = info.position.toDegrees();
+ 		System.println(info);
+ 		var transport = new Transport();
+ 		transport.route = 1;
+ 		transport.departureTime = "12:00";
+		notify.invoke(transport);
+ 	}
 }
 
 
@@ -54,6 +70,7 @@ class TransportView extends Ui.View {
     }
 
 	function onTransport(transport) {
+		System.println(transport);
 		mTransport = Lang.format("Route: $1$ \n Departure: $2$", [transport.route, transport.departureTime]);
 		Ui.requestUpdate();
 	}
