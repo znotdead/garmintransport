@@ -21,8 +21,8 @@ class Timetable
 	var publicHolidays = {1 => [1], 2 => [19, 20, 21], 4 => [3, 4, 6, 7],
 						  5 => [1, 25], 6 => [20], 7 => [1], 9 => [28],
 						  10 => [1, 21], 12 => [25, 26]};
-	// positionTo - coordinates of PI stop
-	// positionFrom - coordinates of destination
+	// To - coordinates of PI stop
+	// From - coordinates of destination
 	// buses
 	var busTsingYi = {:position => [], :timetable => []};
 	var busTsuenWan = {:position => [], :timetable => []};
@@ -35,18 +35,21 @@ class Timetable
 							 :positionFrom => [],
 							 :timetableTo => [1115, 1315, 1515],
 							 :timetableFrom => [1145, 1345, 1545]};
-	var ferryCentral = {:name => "Central",
-						:positionTo => [22.353919, 114.063980],
-						:positionFrom => [22.288446, 114.156534],
-						:timetableTo => [630, 700, 715, 730, 745, 800, 815, 830, 845, 900, 915, 930,
+	var ferryToCentral = {:name => "To Central",
+						  :position => [22.353919, 114.063980],
+						  :timetable => [630, 700, 715, 730, 745, 800, 815, 830, 845, 900, 915, 930,
 										 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1730, 1800,
-										 1830, 1900, 1930, 2000, 2030, 2100, 2200, 2300],
-						:timetableFrom => [700, 730, 745, 800, 815, 830, 845, 900, 915, 930, 945,
+										 1830, 1900, 1930, 2000, 2030, 2100, 2200, 2300]};
+						
+	var ferryFromCentral = {:name => "From Central",
+							:position => [22.288446, 114.156534],
+							:timetable => [700, 730, 745, 800, 815, 830, 845, 900, 915, 930, 945,
 										   1000, 1030, 1130, 1230, 1330, 1430, 1530, 1630, 1730,
 										   1800, 1830, 1900, 1930, 2000, 2030, 2100, 2130, 2230, 2330]};
 	
+	
 	//var stations = [busTsingYi, busTsuenWan, busTsuenWanWest, busKwaiFong, busAirport, ferryTsuenWanWest, ferryCentral];
-	var stations = [ferryTsuenWanWest, ferryCentral];
+	var stations = [ferryToCentral, ferryFromCentral];
 }
 
 
@@ -88,7 +91,7 @@ class TransportModel
 		var holidayDays = timetable.publicHolidays[nowInfo.month];
 		if (holidayDays)
 		{
-			for(var i=0; i < holidayDays.size()-1; i++)
+			for(var i=0; i < holidayDays.size(); i++)
 			{
 				if (nowInfo.day.equals(holidayDays[i]))
 				{
@@ -111,7 +114,48 @@ class TransportModel
  		
  		return timetable.stations;
  	}
+ 
+ 	function getNearestTime(currentTime, times)
+ 	{
+		for (var t=0; t<times.size(); t++)
+		{
+			if (times[t] > currentTime.toNumber())
+			{
+				return times[t];
+			}
+		}
+		return null;
  	
+ 	}
+ 	
+ 	function formatTimeForCompare(hour, min)
+ 	{
+ 		var format = "$1$$2$";
+ 		if (min < 10)
+ 		{
+ 			format = "$1$0$2$";
+ 		}
+ 		return format;
+ 	}
+ 	
+ 	function formatTime(t)
+ 	{
+ 		var hour;
+ 		var min;
+ 		var tStr = t.toString();
+ 		if (tStr.length() == 3)
+ 		{
+	 		hour = tStr.substring(0, 1);
+	 		min = tStr.substring(2, 3);
+ 			
+ 		} else
+ 		{
+ 			hour = tStr.substring(0, 2);
+ 			min = tStr.substring(2, 4);
+ 		}
+ 		return Lang.format("$1$:$2$", [hour, min]);
+ 	}
+ 
  	function getDepartureTimes(routes)
  	{
  	 		
@@ -122,22 +166,45 @@ class TransportModel
  		// check if today is Holiday or Public Holiday
 		var isHoliday = isHoliday(now);
 
-		// get list of departures times (TODO)
-
-		// take next 2 departures (TODO)
-
-		// calculate remaining time for next departures (TODO)
-
- 		// format departures time (TODO: make possible to view many routes)
-		var departureTime = Lang.format("$1$:$2$", [nowInfo.hour, nowInfo.min]);
-		return departureTime;
+		// get list of departures times
+		var times = {};
+		for (var i=0; i<routes.size(); i++)
+		{	
+			// format current time for compare with timetable
+			var n = Lang.format(formatTimeForCompare(nowInfo.hour, nowInfo.min), [nowInfo.hour, nowInfo.min]);
+			// take next departure
+			var nextDeparture = getNearestTime(n, routes[i][:timetable]);
+			times.put(routes[i][:name], formatTime(nextDeparture));
+		}
+		
+		return times;
+ 	}
+ 	
+ 	function formatDepartureTime(t)
+ 	{
+ 		// format departures time
+ 		var formatStr;
+ 		var result = "$1$\n$2$";
+ 		for (var i=0; i<t.size(); i++)
+ 		{
+ 			var route = t.keys()[i];
+ 			var time = t[route];
+ 			if (i < t.size()-1)
+ 			{
+ 				result = Lang.format(result, [Lang.format("$1$: $2$", [route, time]), "$1$\n$2$"]);
+ 			} else
+ 			{
+ 				result = Lang.format(result, [Lang.format("$1$: $2$", [route, time]), ""]);
+ 			}
+ 		}
+		return result.substring(0, result.length()-1);
  	}
  
  	function onPosition(info)
  	{
  		var transport = new Transport();
  		transport.routes = getRoutes(info);
- 		transport.departureTime = getDepartureTimes(transport.routes);
+ 		transport.departureTime = formatDepartureTime(getDepartureTimes(transport.routes));
  		
  		// update widget
 		notify.invoke(transport);
@@ -184,13 +251,14 @@ class TransportView extends Ui.View {
 
 	function onTransport(transport) {
 		var routeNames = [];
-		for (var i=0; i<transport.routes.size()-1; i++)
+		for (var i=0; i<transport.routes.size(); i++)
 		{
+			var a;
 			//TODO
 			//routeNames.add(transport.routes[i][:name]);
 		}
 		
-		mTransport = Lang.format("Route: $1$ \n Departure: $2$", [transport.routes, transport.departureTime]);
+		mTransport = transport.departureTime;
 		Ui.requestUpdate();
 	}
 }
