@@ -108,17 +108,107 @@ class Timetable
                                          2200, 2206, 2212, 2218, 2224, 2230, 2236, 2242, 2248, 2254, 
                                          2300, 2306, 2312, 2318, 2324, 2330, 2340, 2350]};
 	
-	var busTsuenWan = {:position => [], :holidaytimetable => [], :timetable => []};
-	var busTsuenWanWest = {:position => [], :timetable => []};
-	var busKwaiFong = {:position => [], :timetable => []};
-	var busAirport = {:position => [], :timetable => []};
+	var busToTsuenWanWest = {:name => "To TW West",
+                             :position => [22.351297, 114.059446],
+                             :holidaytimetable => [645, 715, 745, 815, 845, 915, 945, 1015, 1045, 1115, 1145, 1215, 
+                                                   1245, 1315, 1345, 1415, 1445, 1515, 1545, 1615, 1645, 1715, 1745, 
+                                                   1815, 1845, 1915, 1945, 2015, 2045, 2115, 2215],
+                             :timetable => [645, 715, 745, 815, 845, 915, 1015, 1115, 1215, 1315, 1415,
+                                            1515, 1615, 1715, 1745, 1815, 1845, 1915, 1945, 2015, 2115, 2215]};
+	var busFromTsuenWanWest = {:name => "From TW West",
+                               :position => [22.368396, 114.112106],
+                               :holidaytimetable => [710, 740, 810, 840, 910, 940, 1010, 1040, 1110, 1140, 1210,
+                                                     1240, 1310, 1340, 1410, 1440, 1510, 1540, 1610, 1640, 1710,
+                                                     1740, 1810, 1840, 1910, 1940, 2010, 2040, 2110, 2140, 2240],
+                               :timetable => [710, 740, 810, 840, 910, 940, 1040, 1140, 1240, 1340, 1440,
+                                              1540, 1640, 1740, 1810, 1840, 1910, 1940, 2010, 2040, 2140, 2240]};
+
+	var busToTsuenWan = {:name => "To Tsuen Wan",
+                         :position => [22.351297, 114.059446],
+                         :holidaytimetable => [000, 600, 630, 700, 730, 800, 830, 900, 920, 940, 1000, 1020, 1040,
+                                               1100, 1120, 1140, 1200, 1220, 1240, 1300, 1320, 1340, 1400, 1420, 1440,
+                                               1500, 1520, 1540, 1600, 1620, 1640, 1700, 1720, 1740, 1800, 1820, 1840,
+                                               1900, 1930, 2000, 2030, 2100, 2130, 2200, 2230, 2300, 2330],
+                         :timetable => [000, 600, 630, 700, 720, 740, 800, 820, 840, 900, 930, 1000, 1030, 1100, 1130,
+                                        1200, 1230, 1300, 1330, 1400, 1430, 1500, 1530, 1600, 1630, 1700, 1720, 1740,
+                                        1800, 1820, 1840, 1900, 1920, 1940, 2000, 2030, 2100, 2130, 2200, 2230, 2300, 2330]};
+    var busFromTsuenWan = {:name => "From Tsuen Wan",
+                           :position => [22.372861, 114.118959],
+                           :holidaytimetable => [020, 620, 650, 720, 750, 820, 850, 920, 940, 1000, 1020, 1040, 1100, 1120,
+                                                 1140, 1200, 1220, 1240, 1300, 1320, 1340, 1400, 1420, 1440, 1500, 1520,
+                                                 1540, 1600, 1620, 1640, 1700, 1720, 1740, 1800, 1820, 1840, 1900, 1920,
+                                                 1950, 2020, 2050, 2120, 2150, 2220, 2250, 2320, 2350],
+                           :timetable => [020, 620, 650, 720, 740, 800, 820, 840, 900, 920, 950, 1020, 1050, 1120, 1150,
+                                          1220, 1250, 1320, 1350, 1420, 1450, 1520, 1550, 1620, 1650, 1720, 1740, 1800,
+                                          1820, 1840, 1900, 1920, 1940, 2000, 2020, 2050, 2120, 2150, 2220, 2250, 2320, 2350]};
+
+	var busToKwaiFong = {:name => "To KwaiFong",
+                         :position => [22.351575, 114.059567],
+                         :holidaytimetable => [000, 015, 045, 115, 145, 215, 245, 315, 345, 415, 445,515, 545,
+                                               600, 615, 630, 640, 650, 700, 710, 720, 730, 740, 750,
+                                               800, 810, 820, 830, 840, 850, 900, 910, 920, 930, 945,
+                                               1000, 1012, 1024, 1036, 1048, 1100, 1112, 1124, 1136, 1148,
+                                               1200, 1212, 1224, 1236, 1248, 1300, 1312, 1324, 1336, 1348,
+                                               1400, 1412, 1424, 1436, 1448, 1500, 1512, 1524, 1536, 1548,
+                                               1600, 1612, 1624, 1636, 1648, 1700, 1710, 1720, 1730, 1740, 1750,
+                                               1800, 1810, 1820, 1820, 1830, 1840, 1850, 1900, 1912, 1924, 1936, 1948,
+                                               2000, 2012, 2024, 2036, 2048, 2100, 2112, 2124, 2136, 2148,
+                                               2200, 2212, 2224, 2236, 2248, 2300, 2315, 2330, 234],
+                         :timetable => [000, 015, 045, 115, 145, 215, 245, 315, 345, 415, 445,515, 545,
+                                        600, 615, 630, 640, 650, 700, 710, 720, 730, 738, 746, 754,
+                                        802, 810, 818, 826, 834, 842, 850, 900, 910, 920, 930, 940, 950,
+                                        1000, 1012, 1024, 1036, 1048, 1100, 1112, 1124, 1136, 1148,
+                                        1200, 1212, 1224, 1236, 1248, 1300, 1312, 1324, 1336, 1348,
+                                        1400, 1412, 1424, 1436, 1448, 1500, 1512, 1524, 1536, 1548,
+                                        1600, 1612, 1624, 1636, 1648, 1700, 1710, 1720, 1730, 1740, 1750,
+                                        1800, 1810, 1820, 1830, 1840, 1850, 1900, 1912, 1924, 1936, 1948,
+                                        2000, 2012, 2024, 2036, 2048, 2100, 2112, 2124, 2136, 2148,
+                                        2200, 2212, 2224, 2236, 2248, 2300, 2315, 2330, 2345]};
+	var busFromKwaiFong = {:name => "From KwaiFong",
+                           :position => [22.357076, 114.126444],
+                           :holidaytimetable => [000, 030, 100, 130, 200, 230, 300, 330, 400, 430, 500, 530,
+                                                 600, 620, 635, 645, 655, 705, 715, 725, 735, 745, 755,
+                                                 805, 815, 825, 835, 845, 855, 905, 915, 925, 935, 945,
+                                                 1000, 1012, 1024, 1036, 1048, 1100, 1112, 1124, 1136, 1148,
+                                                 1200, 1212, 1224, 1236, 1248, 1300, 1312, 1324, 1336, 1348,
+                                                 1400, 1412, 1424, 1436, 1448, 1500, 1512, 1524, 1536, 1548,
+                                                 1600, 1612, 1624, 1636, 1648, 1700, 1710, 1720, 1730, 1740, 1750,
+                                                 1800, 1810, 1820, 1830, 1838, 1846, 1854,
+                                                 1902, 1910, 1918, 1926, 1934, 1942, 1950, 1958,
+                                                 2006, 2014, 2022, 2030, 2038, 2046, 2054,
+                                                 2102, 2110, 2118, 2126, 2134, 2142, 2150, 2158,
+                                                 2206, 2214, 2222, 2230, 2238, 2246, 2254, 2302, 2315, 2330, 2345],
+                           :timetable => [000, 030, 100, 130, 200, 230, 300, 330, 400, 430, 500, 530,
+                                          600, 620, 635, 645, 655, 705, 715, 725, 735, 745, 755,
+                                          805, 815, 825, 835, 845, 855, 905, 915, 925, 935, 945,
+                                          1000, 1012, 1024, 1036, 1048, 1100, 1112, 1124, 1136, 1148,
+                                          1200, 1212, 1224, 1236, 1248, 1300, 1312, 1324, 1336, 1348,
+                                          1400, 1412, 1424, 1436, 1448, 1500, 1512, 1524, 1536, 1548,
+                                          1600, 1612, 1624, 1636, 1648, 1700, 1710, 1720, 1730, 1740, 1750, 1758,
+                                          1806, 1814, 1822, 1830, 1838, 1846, 1854,
+                                          1902, 1910, 1918, 1926, 1934, 1942, 1950, 1958,
+                                          2006, 2014, 2022, 2030, 2038, 2046, 2054,
+                                          2102, 2110, 2118, 2126, 2134, 2142, 2150, 2158,
+                                          2206, 2214, 2222, 2230, 2238, 2246, 2254, 2302, 2315, 2330, 2345]};
+
+	var busToAirport = {:name => "To Airport",
+                        :position => [22.351297, 114.059446],
+                        :timetable => [000, 600, 630, 700, 730, 800, 830, 900, 930, 1000, 1030, 1100, 1130,
+                                       1200, 1230, 1300, 1330, 1400, 1430, 1500, 1530, 1600, 1630, 1700, 1730,
+                                       1800, 1830, 1900, 1930, 2000, 2030, 2100, 2130, 2200, 2230, 2300, 2330]};
+	var busFromAirport = {:name => "From Airport",
+                          :position => [22.316235, 113.937259],
+                          :timetable => [000, 030, 630, 700, 730, 800, 830, 900, 930, 1000, 1030, 1100, 1130, 1200,
+                                         1230, 1300, 1330, 1400, 1430, 1500, 1530, 1600, 1630, 1700, 1730, 1800, 1830,
+                                         1900, 1930, 2000, 2030, 2100, 2130, 2200, 2230, 2300, 2330]};
+
 	// ferries
 	var ferryToTsuenWanWest = {:name => "To Tsuen Wan",
-							   :position => [],
+							   :position => [22.352870, 114.064371],
 							   :timetable => [1115, 1315, 1515]};
 
 	var ferryFromTsuenWanWest = {:name => "From Tsuen Wan",
-								 :position => [],
+								 :position => [22.366719, 114.110642],
 						  		 :timetable => [1145, 1345, 1545]};
 								 
 	var ferryToCentral = {:name => "To Central",
@@ -140,8 +230,17 @@ class Timetable
 	
 	//var stations = [busTsingYi, busTsuenWan, busTsuenWanWest, busKwaiFong, busAirport, ferryTsuenWanWest, ferryCentral];
 	var stations = [ferryToCentral, ferryFromCentral, 
-                   // ferryToTsuenWanWest, ferryFromTsuenWanWest,
-                    busToTsingYi, busFromTsingYi];
+                    ferryToTsuenWanWest, ferryFromTsuenWanWest,
+                    busToTsingYi, busFromTsingYi,
+                    busToTsuenWanWest, busFromTsuenWanWest,
+                    busToTsuenWan, busFromTsuenWan,
+                    busToKwaiFong, busFromKwaiFong,
+                    busToAirport, busFromAirport];
+    var favoriteStations = [ferryToCentral, ferryFromCentral, 
+                    ferryToTsuenWanWest, ferryFromTsuenWanWest,
+                    busToTsingYi, busFromTsingYi,
+                    busToTsuenWanWest, busFromTsuenWanWest,
+                    busToTsuenWan, busFromTsuenWan];
 }
 
 
@@ -202,19 +301,28 @@ class TransportModel
  	{
  		// get current position
  		var latLon = info.position.toDegrees();
- 		var stations = new [6];
-		// get nearest routes (TODO)
+ 		//latLon = [22.288608, 114.156656];
+ 		var stations = new [14];
+		// get nearest routes
  		for (var i=0; i<timetable.stations.size(); i++)
  		{
  			var station = timetable.stations[i][:position];
  			var distance = getDistance(latLon[0], latLon[1], station[0], station[1]);
- 			System.println(distance);
  			if (distance < 1)
  			{
 	 			stations[i] = timetable.stations[i];
  			}
  		}
-  		return stations;
+ 		// if no stations show favorite
+		System.println(stations);
+		for (var i=0; i<stations.size(); i++){
+			if (stations[i] != null)
+			{
+				return stations;
+			}
+		}
+		//return stations;
+  		return timetable.favoriteStations;
  	}
  
  	function getNearestTime(currentTime, times)
@@ -244,18 +352,25 @@ class TransportModel
  	{
  		var hour;
  		var min;
- 		var tStr = t.toString();
- 		if (tStr.length() == 3)
+ 		System.println(t);
+ 		if (t == null)
  		{
-	 		hour = tStr.substring(0, 1);
-	 		min = tStr.substring(2, 3);
+ 			return "Last";
+ 		} else 
+ 		{
+ 			var tStr = t.toString();
+ 			if (tStr.length() == 3)
+ 			{
+		 		hour = tStr.substring(0, 1);
+		 		min = tStr.substring(2, 3);
  			
- 		} else
- 		{
- 			hour = tStr.substring(0, 2);
- 			min = tStr.substring(2, 4);
+ 			} else
+ 			{
+ 				hour = tStr.substring(0, 2);
+ 				min = tStr.substring(2, 4);
+ 			}
+ 			return Lang.format("$1$:$2$", [hour, min]);
  		}
- 		return Lang.format("$1$:$2$", [hour, min]);
  	}
  
  	function getDepartureTimes(routes)
