@@ -291,20 +291,30 @@ class TransportModel
  	function getRoutes(info) {
  		// get current position
  		var latLon = info.position.toDegrees();
- 		latLon = [22.288608, 114.156656];
- 		var stations = new[14];
-		// sort stations by distance (TODO)
- 		//for (var i=0; i<timetable.stations.size(); i++)
- 		//{
- 		//	var station = timetable.stations[i][:position];
- 		//	var distance = getDistance(latLon[0], latLon[1], station[0], station[1]);
- 		//	if (distance < 1)
- 		//	{
-	 	//		stations[i] = timetable.stations[i];
- 		//	} else {
- 		//		stations[timetable.stations.size() - i - 1] = timetable.stations[i];
- 		//	}
- 		//}
+ 		//latLon = [22.288608, 114.156656];
+
+		// sort stations by distance
+		var stations = {};
+ 		for (var i=0; i<timetable.stations.size(); i++)
+ 		{
+ 			var station = timetable.stations[i][:position];
+ 			var distance = getDistance(latLon[0], latLon[1], station[0], station[1]);
+
+ 			stations.put(timetable.stations[i][:name], distance);
+ 		}
+ 		
+ 		for (var i=0; i<timetable.stations.size(); i++)
+ 		{
+ 			for (var j=0; j<timetable.stations.size() - 1; j++)
+ 			{
+ 				if (stations.get(timetable.stations[j][:name]) > stations.get(timetable.stations[j+1][:name]))
+ 				{
+ 					var temp = timetable.stations[j+1];
+ 					timetable.stations[j+1] = timetable.stations[j];
+ 					timetable.stations[j] = temp;
+ 				}
+ 			}
+ 		}
 		return timetable.stations;
  	}
  
