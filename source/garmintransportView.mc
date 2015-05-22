@@ -6,6 +6,7 @@ using Toybox.Time.Gregorian;
 
 class Transport
 {
+	var route;
 	var routes;
 	var departureTime;
 }
@@ -203,15 +204,15 @@ class Timetable
                                          1900, 1930, 2000, 2030, 2100, 2130, 2200, 2230, 2300, 2330]};
 
 	// ferries
-	var ferryToTsuenWanWest = {:name => "To Tsuen Wan",
+	var ferryToTsuenWanWest = {:name => "Ferry To Tsuen Wan",
 							   :position => [22.352870, 114.064371],
 							   :timetable => [1115, 1315, 1515]};
 
-	var ferryFromTsuenWanWest = {:name => "From Tsuen Wan",
+	var ferryFromTsuenWanWest = {:name => "Ferry From Tsuen Wan",
 								 :position => [22.366719, 114.110642],
 						  		 :timetable => [1145, 1345, 1545]};
 								 
-	var ferryToCentral = {:name => "To Central",
+	var ferryToCentral = {:name => "Ferry To Central",
 						  :position => [22.352870, 114.064371],
 						  :holidaytimetable => [700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500,
 						  						 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300],
@@ -219,7 +220,7 @@ class Timetable
 										 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1730, 1800,
 										 1830, 1900, 1930, 2000, 2030, 2100, 2200, 2300]};
 						
-	var ferryFromCentral = {:name => "From Central",
+	var ferryFromCentral = {:name => "Ferry From Central",
 							:position => [22.288608, 114.156656],
 							:holidaytimetable => [730, 830, 930, 1030, 1130, 1230, 1330, 1430, 1530,
 												  1630, 1730, 1830, 1930, 2030, 2130, 2230, 2330],
@@ -228,7 +229,6 @@ class Timetable
 										   1800, 1830, 1900, 1930, 2000, 2030, 2100, 2130, 2230, 2330]};
 	
 	
-	//var stations = [busTsingYi, busTsuenWan, busTsuenWanWest, busKwaiFong, busAirport, ferryTsuenWanWest, ferryCentral];
 	var stations = [ferryToCentral, ferryFromCentral, 
                     ferryToTsuenWanWest, ferryFromTsuenWanWest,
                     busToTsingYi, busFromTsingYi,
@@ -236,11 +236,6 @@ class Timetable
                     busToTsuenWan, busFromTsuenWan,
                     busToKwaiFong, busFromKwaiFong,
                     busToAirport, busFromAirport];
-    var favoriteStations = [ferryToCentral, ferryFromCentral, 
-                    ferryToTsuenWanWest, ferryFromTsuenWanWest,
-                    busToTsingYi, busFromTsingYi,
-                    busToTsuenWanWest, busFromTsuenWanWest,
-                    busToTsuenWan, busFromTsuenWan];
 }
 
 
@@ -249,19 +244,16 @@ class TransportModel
 	hidden var notify;
 	hidden var timetable = new Timetable();
 
-	function initialize(handler)
-	{
+	function initialize(handler) {
 		Position.enableLocationEvents(Position.LOCATION_CONTINUOUS, method(:onPosition));
 		notify = handler;
 	}
 
-    function rad(x)
-    {
+    function rad(x) {
         var PIx = 3.141592653589793;
         return x * PIx / 180;
     }
-	function getDistance(lat1, lon1, lat2, lon2)
-	{
+	function getDistance(lat1, lon1, lat2, lon2) {
 		var R = 6378.16; //km
         var dlon = rad(lon2 - lon1);
         var dlat = rad(lat2 - lat1);
@@ -270,8 +262,7 @@ class TransportModel
         return angle * R;
 	}
 
-	function isHoliday(now)
-	{
+	function isHoliday(now) {
 		var isHoliday = false;
 		var nowInfo = Gregorian.info(now, Time.FORMAT_SHORT);
 
@@ -297,49 +288,53 @@ class TransportModel
  		return isHoliday;
  	}
  
- 	function getRoutes(info)
- 	{
+ 	function getRoutes(info) {
  		// get current position
  		var latLon = info.position.toDegrees();
- 		//latLon = [22.288608, 114.156656];
- 		var stations = new [14];
-		// get nearest routes
- 		for (var i=0; i<timetable.stations.size(); i++)
- 		{
- 			var station = timetable.stations[i][:position];
- 			var distance = getDistance(latLon[0], latLon[1], station[0], station[1]);
- 			if (distance < 1)
- 			{
-	 			stations[i] = timetable.stations[i];
- 			}
- 		}
- 		// if no stations show favorite
-		System.println(stations);
-		for (var i=0; i<stations.size(); i++){
-			if (stations[i] != null)
-			{
-				return stations;
-			}
-		}
-		//return stations;
-  		return timetable.favoriteStations;
+ 		latLon = [22.288608, 114.156656];
+ 		var stations = new[14];
+		// sort stations by distance (TODO)
+ 		//for (var i=0; i<timetable.stations.size(); i++)
+ 		//{
+ 		//	var station = timetable.stations[i][:position];
+ 		//	var distance = getDistance(latLon[0], latLon[1], station[0], station[1]);
+ 		//	if (distance < 1)
+ 		//	{
+	 	//		stations[i] = timetable.stations[i];
+ 		//	} else {
+ 		//		stations[timetable.stations.size() - i - 1] = timetable.stations[i];
+ 		//	}
+ 		//}
+		return timetable.stations;
  	}
  
- 	function getNearestTime(currentTime, times)
- 	{
+ 	function getNearestTime(currentTime, times) {
+		var departures = [null, null, null];
 		for (var t=0; t<times.size(); t++)
 		{
+			// find next time
 			if (times[t] > currentTime.toNumber())
 			{
-				return times[t];
+				departures[1] = formatTime(times[t]);
+				// find previous time
+				if (t != 0)
+				{
+					departures[0] = formatTime(times[t-1]);
+				}
+				// find next after nearest time
+				if (t != times.size() - 1)
+				{
+					departures[2] = formatTime(times[t+1]);
+				}
+				return departures;
 			}
 		}
-		return null;
- 	
+		departures[0] = formatTime(times[times.size()-1]);
+		departures[1] = "Last";
+		return departures;
  	}
  	
- 	function formatTimeForCompare(hour, min)
- 	{
+ 	function formatTimeForCompare(hour, min) {
  		var format = "$1$$2$";
  		if (min < 10)
  		{
@@ -348,12 +343,10 @@ class TransportModel
  		return format;
  	}
  	
- 	function formatTime(t)
- 	{
+ 	function formatTime(t) {
  		var hour;
  		var min;
- 		System.println(t);
- 		if (t == null)
+ 		if (t == "")
  		{
  			return "Last";
  		} else 
@@ -373,8 +366,7 @@ class TransportModel
  		}
  	}
  
- 	function getDepartureTimes(routes)
- 	{
+ 	function getDepartureTimes(route) {
  	 		
  		// get now object
  		var now = Time.now();
@@ -385,69 +377,61 @@ class TransportModel
 
 		// get list of departures times
 		var times = {};
-		for (var i=0; i<routes.size(); i++)
-		{
-			if (routes[i] != null)
-			{
-				// format current time for compare with timetable
-				var n = Lang.format(formatTimeForCompare(nowInfo.hour, nowInfo.min), [nowInfo.hour, nowInfo.min]);
-				var todaysTimetable;
-				// get timetable for holiday or regular
-				if (isHoliday == true && routes[i].hasKey(:holidaytimetable))
-				{
-					todaysTimetable = routes[i][:holidaytimetable];
-				} else
-				{
-					todaysTimetable = routes[i][:timetable];
-				}
-				// take next departure
-				var nextDeparture = getNearestTime(n, todaysTimetable);
-				times.put(routes[i][:name], formatTime(nextDeparture));
-			}
-		}
+		// format current time for compare with timetable
+		var n = Lang.format(formatTimeForCompare(nowInfo.hour, nowInfo.min), [nowInfo.hour, nowInfo.min]);
 		
-		return times;
+		var todaysTimetable;
+		// get timetable for holiday or regular
+		if (isHoliday == true && route.hasKey(:holidaytimetable))
+		{
+			todaysTimetable = route[:holidaytimetable];
+		} else {
+			todaysTimetable = route[:timetable];
+		}
+		// take next departure
+		var departures = getNearestTime(n, todaysTimetable);
+		return departures;
  	}
  	
- 	function formatDepartureTime(t)
- 	{
- 		// format departures time
- 		var formatStr;
- 		var result = "$1$\n$2$";
- 		if (t.size() == 0) {
- 			return "You are far away from bus stops";
- 		}
- 		for (var i=0; i<t.size(); i++)
- 		{
- 			var route = t.keys()[i];
- 			var time = t[route];
- 			if (i < t.size()-1)
- 			{
- 				result = Lang.format(result, [Lang.format("$1$: $2$", [route, time]), "$1$\n$2$"]);
- 			} else
- 			{
- 				result = Lang.format(result, [Lang.format("$1$: $2$", [route, time]), ""]);
- 			}
- 		}
-		return result.substring(0, result.length()-1);
- 	}
- 
- 	function onPosition(info)
- 	{
+ 	function onPosition(info) {
  		var transport = new Transport();
- 		transport.routes = getRoutes(info);
- 		transport.departureTime = formatDepartureTime(getDepartureTimes(transport.routes));
+ 		transport.routes = getRoutes(info);  // sorted routes
+ 		transport.route = transport.routes[p]; // show one route on page
+ 		transport.departureTime = getDepartureTimes(transport.route);
  		
  		// update widget
 		notify.invoke(transport);
   	}
 }
 
+var p = 0;
+class BaseInputDelegate extends Ui.BehaviorDelegate {
+	function onNextPage(){
+		if (p == 13) {
+			p = 0;
+		} else {
+			p = p + 1;
+		}
+		Ui.requestUpdate();
+	}
+	
+	function onPreviousPage(){
+		if (p == 0) {
+			p = 13;
+		} else {
+			p = p - 1;
+		}
+		Ui.requestUpdate();
+	}
+}
 
 class TransportView extends Ui.View {
 
 	hidden var mModel;
 	hidden var mTransport = "";
+	hidden var prevDeparture = "";
+	hidden var nearestDeparture = "";
+	hidden var nextAfterNearestDeparture = "";
 	
     //! Load your resources here
     function onLayout(dc) {
@@ -473,7 +457,10 @@ class TransportView extends Ui.View {
     	//var info = Gregorian.info(now, Time.FORMAT_LONG);
     	
     	//var dateStr = Lang.format("$1$ $2$ $3$", [info.day_of_week, info.month, info.day]);
-    	dc.drawText(width/2, lenght/2, Gfx.FONT_XTINY, mTransport, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    	dc.drawText(width/2, lenght/5, Gfx.FONT_XTINY, mTransport, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    	dc.drawText(width/2, lenght/5 * 2, Gfx.FONT_TINY, prevDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    	dc.drawText(width/2, lenght/5 * 3, Gfx.FONT_MEDIUM, nearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    	dc.drawText(width/2, lenght/5 * 4, Gfx.FONT_TINY, nextAfterNearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
     }
 
     //! Called when this View is removed from the screen. Save the
@@ -482,7 +469,16 @@ class TransportView extends Ui.View {
     }
 
 	function onTransport(transport) {
-		mTransport = transport.departureTime;
+		mTransport = transport.route[:name];
+		prevDeparture = Lang.format("Previous: $1$", [transport.departureTime[0]]);
+		nearestDeparture = Lang.format("NOW: $1$", [transport.departureTime[1]]);
+		if (transport.departureTime[2] == null)
+		{
+			nextAfterNearestDeparture = "";
+		} else {
+			nextAfterNearestDeparture = Lang.format("Next: $1$", [transport.departureTime[2]]);
+		}
+		
 		Ui.requestUpdate();
 	}
 }

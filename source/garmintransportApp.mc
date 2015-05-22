@@ -17,7 +17,7 @@ class garmintransportApp extends App.AppBase {
 
     //! Return the initial view of your application here
     function getInitialView() {
-        return [ mView ];
+        return [ mView, new BaseInputDelegate()];
     }
 
 }
