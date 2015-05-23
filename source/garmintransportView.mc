@@ -365,7 +365,7 @@ class TransportModel
  			if (tStr.length() == 3)
  			{
 		 		hour = tStr.substring(0, 1);
-		 		min = tStr.substring(2, 3);
+		 		min = tStr.substring(1, 3);
  			
  			} else
  			{
@@ -416,23 +416,18 @@ class TransportModel
 
 var p = 0;
 class BaseInputDelegate extends Ui.BehaviorDelegate {
-	function onNextPage(){
-		if (p == 13) {
-			p = 0;
-		} else {
-			p = p + 1;
-		}
-		Ui.requestUpdate();
-	}
-	
-	function onPreviousPage(){
-		if (p == 0) {
-			p = 13;
-		} else {
-			p = p - 1;
-		}
-		Ui.requestUpdate();
-	}
+
+    function onKey(evt){
+        if (evt.getKey() == WatchUi.KEY_ENTER)
+        {
+		    if (p == 13) {
+		    	p = 0;
+		    } else {
+		    	p = p + 1;
+		    }
+		    Ui.requestUpdate();
+        }
+    }
 }
 
 class TransportView extends Ui.View {
@@ -467,7 +462,7 @@ class TransportView extends Ui.View {
     	//var info = Gregorian.info(now, Time.FORMAT_LONG);
     	
     	//var dateStr = Lang.format("$1$ $2$ $3$", [info.day_of_week, info.month, info.day]);
-    	dc.drawText(width/2, lenght/5, Gfx.FONT_XTINY, mTransport, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    	dc.drawText(width/2, lenght/5, Gfx.FONT_MEDIUM, mTransport, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
     	dc.drawText(width/2, lenght/5 * 2, Gfx.FONT_TINY, prevDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
     	dc.drawText(width/2, lenght/5 * 3, Gfx.FONT_MEDIUM, nearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
     	dc.drawText(width/2, lenght/5 * 4, Gfx.FONT_TINY, nextAfterNearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
