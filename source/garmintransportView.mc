@@ -268,7 +268,7 @@ class TransportModel
 
 		// check Sat and Sun
 		var dayOfWeekStr = nowInfo.day_of_week.toString();
-		if (dayOfWeekStr.equals("Sun") || dayOfWeekStr.equals("Sat"))
+		if (dayOfWeekStr.equals("1") || dayOfWeekStr.equals("7"))
 		{
  			isHoliday = true;
 		}
