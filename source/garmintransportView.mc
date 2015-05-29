@@ -457,7 +457,7 @@ class TransportView extends Ui.View {
         // Call the parent onUpdate function to redraw the layout
 		dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
 		dc.clear();
-        //View.onUpdate(dc);
+        View.onUpdate(dc);
 
 		var width = dc.getWidth();
 		var lenght = dc.getHeight();
@@ -466,9 +466,13 @@ class TransportView extends Ui.View {
     	//var info = Gregorian.info(now, Time.FORMAT_LONG);
     	
     	//var dateStr = Lang.format("$1$ $2$ $3$", [info.day_of_week, info.month, info.day]);
+    	dc.setColor(Gfx.COLOR_BLUE, Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
     	dc.drawText(width/2, lenght/5, Gfx.FONT_MEDIUM, mTransport, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+		dc.setColor(Gfx.COLOR_ORANGE, Gfx.COLOR_BLACK);
     	dc.drawText(width/2, lenght/5 * 2, Gfx.FONT_TINY, prevDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    	dc.setColor(Gfx.COLOR_GREEN, Gfx.COLOR_BLACK);
     	dc.drawText(width/2, lenght/5 * 3, Gfx.FONT_MEDIUM, nearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    	dc.setColor(Gfx.COLOR_PINK, Gfx.COLOR_BLACK);
     	dc.drawText(width/2, lenght/5 * 4, Gfx.FONT_TINY, nextAfterNearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
     }
 
