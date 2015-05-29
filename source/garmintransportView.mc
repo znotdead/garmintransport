@@ -372,7 +372,11 @@ class TransportModel
  				hour = tStr.substring(0, 2);
  				min = tStr.substring(2, 4);
  			}
- 			return Lang.format("$1$:$2$", [hour, min]);
+ 			var now = Time.now();
+ 			var nowInfo = Gregorian.info(now, Time.FORMAT_LONG);
+ 			var n = Lang.format(formatTimeForCompare(nowInfo.hour, nowInfo.min), [nowInfo.hour, nowInfo.min]);
+ 			var delta = t.toNumber() - n.toNumber();
+ 			return Lang.format("$1$:$2$ ($3$ min)", [hour, min, delta.toString()]);
  		}
  	}
  
