@@ -455,25 +455,50 @@ class TransportView extends Ui.View {
     //! Update the view
     function onUpdate(dc) {
         // Call the parent onUpdate function to redraw the layout
-		dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
-		dc.clear();
-        View.onUpdate(dc);
+		// night theme
+    	var now = Time.now();
+    	var info = Gregorian.info(now, Time.FORMAT_LONG);
+    	
+    	var night = false;
+    	if (info.hour > 19)
+    	{
+    		night = true;
+    	}
 
+        
 		var width = dc.getWidth();
 		var lenght = dc.getHeight();
 		
-    	//var now = Time.now();
-    	//var info = Gregorian.info(now, Time.FORMAT_LONG);
-    	
     	//var dateStr = Lang.format("$1$ $2$ $3$", [info.day_of_week, info.month, info.day]);
-    	dc.setColor(Gfx.COLOR_BLUE, Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
-    	dc.drawText(width/2, lenght/5, Gfx.FONT_MEDIUM, mTransport, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
-		dc.setColor(Gfx.COLOR_ORANGE, Gfx.COLOR_BLACK);
-    	dc.drawText(width/2, lenght/5 * 2, Gfx.FONT_TINY, prevDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
-    	dc.setColor(Gfx.COLOR_GREEN, Gfx.COLOR_BLACK);
-    	dc.drawText(width/2, lenght/5 * 3, Gfx.FONT_MEDIUM, nearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
-    	dc.setColor(Gfx.COLOR_PINK, Gfx.COLOR_BLACK);
-    	dc.drawText(width/2, lenght/5 * 4, Gfx.FONT_TINY, nextAfterNearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    	//View.onUpdate(dc);
+    	if (night)
+    	{
+    		dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
+    	} else {
+    		dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_WHITE, Gfx.COLOR_WHITE);
+    	}
+    	dc.clear();
+    	
+    	if (night)
+    	{
+    		dc.setColor(Gfx.COLOR_BLUE, Gfx.COLOR_BLACK);
+    		dc.drawText(width/2, lenght/5, Gfx.FONT_MEDIUM, mTransport, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+			dc.setColor(Gfx.COLOR_ORANGE, Gfx.COLOR_BLACK);
+    		dc.drawText(width/2, lenght/5 * 2, Gfx.FONT_TINY, prevDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    		dc.setColor(Gfx.COLOR_GREEN, Gfx.COLOR_BLACK);
+    		dc.drawText(width/2, lenght/5 * 3, Gfx.FONT_MEDIUM, nearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    		dc.setColor(Gfx.COLOR_PINK, Gfx.COLOR_BLACK);
+    		dc.drawText(width/2, lenght/5 * 4, Gfx.FONT_TINY, nextAfterNearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    	} else {
+			dc.setColor(Gfx.COLOR_DK_BLUE, Gfx.COLOR_WHITE);
+    		dc.drawText(width/2, lenght/5, Gfx.FONT_MEDIUM, mTransport, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+			dc.setColor(Gfx.COLOR_DK_RED, Gfx.COLOR_TRANSPARENT);
+    		dc.drawText(width/2, lenght/5 * 2, Gfx.FONT_TINY, prevDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    		dc.setColor(Gfx.COLOR_DK_GREEN, Gfx.COLOR_TRANSPARENT);
+    		dc.drawText(width/2, lenght/5 * 3, Gfx.FONT_MEDIUM, nearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    		dc.setColor(Gfx.COLOR_PURPLE, Gfx.COLOR_TRANSPARENT);
+    		dc.drawText(width/2, lenght/5 * 4, Gfx.FONT_TINY, nextAfterNearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    	}
     }
 
     //! Called when this View is removed from the screen. Save the
