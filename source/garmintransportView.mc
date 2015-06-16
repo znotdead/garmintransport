@@ -375,7 +375,7 @@ class TransportModel
  			var now = Time.now();
  			var nowInfo = Gregorian.info(now, Time.FORMAT_LONG);
  			var n = Lang.format(formatTimeForCompare(nowInfo.hour, nowInfo.min), [nowInfo.hour, nowInfo.min]);
- 			var delta = t.toNumber() - n.toNumber();
+ 			var delta = (hour.toNumber() - nowInfo.hour) * 60 + (min.toNumber() - nowInfo.min);
  			return Lang.format("$1$:$2$ ($3$ min)", [hour, min, delta.toString()]);
  		}
  	}
