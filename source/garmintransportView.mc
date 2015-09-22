@@ -4,13 +4,6 @@ using Toybox.System;
 using Toybox.Graphics as Gfx;
 using Toybox.Time.Gregorian;
 
-class Transport
-{
-	var route;
-	var routes;
-	var departureTime;
-}
-
 
 class Timetable
 {
@@ -230,38 +223,93 @@ class Timetable
 	
 	
 	var stations = [ferryToCentral, ferryFromCentral, 
-                    ferryToTsuenWanWest, ferryFromTsuenWanWest,
                     busToTsingYi, busFromTsingYi,
                     busToTsuenWanWest, busFromTsuenWanWest,
                     busToTsuenWan, busFromTsuenWan,
+                    ferryToTsuenWanWest, ferryFromTsuenWanWest,
                     busToKwaiFong, busFromKwaiFong,
                     busToAirport, busFromAirport];
 }
 
+var timetable = new Timetable();
 
-class TransportModel
-{
-	hidden var notify;
-	hidden var timetable = new Timetable();
+class TransportView extends Ui.View {
 
-	function initialize(handler) {
-		Position.enableLocationEvents(Position.LOCATION_CONTINUOUS, method(:onPosition));
-		notify = handler;
-	}
+	hidden var mTransport = "";
+	hidden var prevDeparture = "";
+	hidden var nearestDeparture = "";
+	hidden var nextAfterNearestDeparture = "";
 
-    function rad(x) {
-        var PIx = 3.141592653589793;
-        return x * PIx / 180;
+	hidden var route;
+	hidden var routes;
+	hidden var departureTime;
+
+
+    //! Load your resources here
+    function onLayout(dc) {
     }
-	function getDistance(lat1, lon1, lat2, lon2) {
-		var R = 6378.16; //km
-        var dlon = rad(lon2 - lon1);
-        var dlat = rad(lat2 - lat1);
-        var a = (Math.sin(dlat/2) * Math.sin(dlat/2)) + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * (Math.sin(dlon/2) * Math.sin(dlon/2));
-        var angle = 2 * Math.atan(Math.sqrt(a), Math.sqrt(1 - a));
-        return angle * R;
-	}
 
+    //! Restore the state of the app and prepare the view to be shown
+    function onShow() {
+    }
+
+    //! Update the view
+    function onUpdate(dc) {
+
+        // Call the parent onUpdate function to redraw the layout
+		// night theme
+    	var now = Time.now();
+    	var info = Gregorian.info(now, Time.FORMAT_LONG);
+    	
+    	var night = false;
+    	if (info.hour > 19)
+    	{
+    		night = true;
+    	}
+        
+		var width = dc.getWidth();
+		var lenght = dc.getHeight();
+		
+    	if (night)
+    	{
+    		dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
+    	} else {
+    		dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_WHITE, Gfx.COLOR_WHITE);
+    	}
+    	dc.clear();
+    	
+    	if (night)
+    	{
+    		dc.setColor(Gfx.COLOR_BLUE, Gfx.COLOR_BLACK);
+    		dc.drawText(width/2, lenght/5, Gfx.FONT_MEDIUM, mTransport, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+			dc.setColor(Gfx.COLOR_ORANGE, Gfx.COLOR_BLACK);
+    		dc.drawText(width/2, lenght/5 * 2, Gfx.FONT_TINY, prevDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    		dc.setColor(Gfx.COLOR_GREEN, Gfx.COLOR_BLACK);
+    		dc.drawText(width/2, lenght/5 * 3, Gfx.FONT_MEDIUM, nearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    		dc.setColor(Gfx.COLOR_PINK, Gfx.COLOR_BLACK);
+    		dc.drawText(width/2, lenght/5 * 4, Gfx.FONT_TINY, nextAfterNearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    	} else {
+			dc.setColor(Gfx.COLOR_DK_BLUE, Gfx.COLOR_WHITE);
+    		dc.drawText(width/2, lenght/5, Gfx.FONT_MEDIUM, mTransport, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+			dc.setColor(Gfx.COLOR_DK_RED, Gfx.COLOR_TRANSPARENT);
+    		dc.drawText(width/2, lenght/5 * 2, Gfx.FONT_TINY, prevDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    		dc.setColor(Gfx.COLOR_DK_GREEN, Gfx.COLOR_TRANSPARENT);
+    		dc.drawText(width/2, lenght/5 * 3, Gfx.FONT_MEDIUM, nearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    		dc.setColor(Gfx.COLOR_PURPLE, Gfx.COLOR_TRANSPARENT);
+    		dc.drawText(width/2, lenght/5 * 4, Gfx.FONT_TINY, nextAfterNearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
+    	}
+    }
+
+    //! Called when this View is removed from the screen. Save the
+    //! state of your app here.
+    function onHide() {
+    }
+
+	function initialize() {
+ 	    routes = timetable.stations;  // sorted routes
+        setPage(0);
+	}
+	
 	function isHoliday(now) {
 		var isHoliday = false;
 		var nowInfo = Gregorian.info(now, Time.FORMAT_SHORT);
@@ -286,36 +334,6 @@ class TransportModel
 			}
 		}
  		return isHoliday;
- 	}
- 
- 	function getRoutes(info) {
- 		// get current position
- 		var latLon = info.position.toDegrees();
- 		//latLon = [22.288608, 114.156656];
-
-		// sort stations by distance
-		var stations = {};
- 		for (var i=0; i<timetable.stations.size(); i++)
- 		{
- 			var station = timetable.stations[i][:position];
- 			var distance = getDistance(latLon[0], latLon[1], station[0], station[1]);
-
- 			stations.put(timetable.stations[i][:name], distance);
- 		}
- 		
- 		for (var i=0; i<timetable.stations.size(); i++)
- 		{
- 			for (var j=0; j<timetable.stations.size() - 1; j++)
- 			{
- 				if (stations.get(timetable.stations[j][:name]) > stations.get(timetable.stations[j+1][:name]))
- 				{
- 					var temp = timetable.stations[j+1];
- 					timetable.stations[j+1] = timetable.stations[j];
- 					timetable.stations[j] = temp;
- 				}
- 			}
- 		}
-		return timetable.stations;
  	}
  
  	function getNearestTime(currentTime, times) {
@@ -407,15 +425,24 @@ class TransportModel
 		return departures;
  	}
  	
- 	function onPosition(info) {
- 		var transport = new Transport();
- 		transport.routes = getRoutes(info);  // sorted routes
- 		transport.route = transport.routes[p]; // show one route on page
- 		transport.departureTime = getDepartureTimes(transport.route);
- 		
- 		// update widget
-		notify.invoke(transport);
-  	}
+
+	function setPage(p) {
+        route = routes[p]; // show one route on page
+ 		departureTime = getDepartureTimes(route);
+	
+		mTransport = route[:name];
+		//System.println(mTransport);
+		prevDeparture = Lang.format("Previous: $1$", [departureTime[0]]);
+		nearestDeparture = Lang.format("NOW: $1$", [departureTime[1]]);
+		if (departureTime[2] == null)
+		{
+			nextAfterNearestDeparture = "";
+		} else {
+			nextAfterNearestDeparture = Lang.format("Next: $1$", [departureTime[2]]);
+		}
+		
+		Ui.requestUpdate();
+	}
 }
 
 var p = 0;
@@ -429,94 +456,17 @@ class BaseInputDelegate extends Ui.BehaviorDelegate {
 		    } else {
 		    	p = p + 1;
 		    }
-		    Ui.requestUpdate();
+
+			//System.println(p);
+            //System.println( "usedMemory: " + System.getSystemStats().usedMemory );
+            //System.println( "freeMemory: " + System.getSystemStats().freeMemory );
+            var mView = new TransportView();
+            //System.println(mView);
+            //System.println( "usedMemory: " + System.getSystemStats().usedMemory );
+		    //System.println("Key");
+            mView.setPage(p);
+            var delegate = new BaseInputDelegate();
+		    Ui.switchToView(mView, delegate, Ui.SLIDE_IMMEDIATE);
         }
     }
-}
-
-class TransportView extends Ui.View {
-
-	hidden var mModel;
-	hidden var mTransport = "";
-	hidden var prevDeparture = "";
-	hidden var nearestDeparture = "";
-	hidden var nextAfterNearestDeparture = "";
-	
-    //! Load your resources here
-    function onLayout(dc) {
-    	mTransport = "Waiting for GPS";
-        //setLayout(Rez.Layouts.MainLayout(dc));
-    }
-
-    //! Restore the state of the app and prepare the view to be shown
-    function onShow() {
-    }
-
-    //! Update the view
-    function onUpdate(dc) {
-        // Call the parent onUpdate function to redraw the layout
-		// night theme
-    	var now = Time.now();
-    	var info = Gregorian.info(now, Time.FORMAT_LONG);
-    	
-    	var night = false;
-    	if (info.hour > 19)
-    	{
-    		night = true;
-    	}
-
-        
-		var width = dc.getWidth();
-		var lenght = dc.getHeight();
-		
-    	//var dateStr = Lang.format("$1$ $2$ $3$", [info.day_of_week, info.month, info.day]);
-    	//View.onUpdate(dc);
-    	if (night)
-    	{
-    		dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
-    	} else {
-    		dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_WHITE, Gfx.COLOR_WHITE);
-    	}
-    	dc.clear();
-    	
-    	if (night)
-    	{
-    		dc.setColor(Gfx.COLOR_BLUE, Gfx.COLOR_BLACK);
-    		dc.drawText(width/2, lenght/5, Gfx.FONT_MEDIUM, mTransport, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
-			dc.setColor(Gfx.COLOR_ORANGE, Gfx.COLOR_BLACK);
-    		dc.drawText(width/2, lenght/5 * 2, Gfx.FONT_TINY, prevDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
-    		dc.setColor(Gfx.COLOR_GREEN, Gfx.COLOR_BLACK);
-    		dc.drawText(width/2, lenght/5 * 3, Gfx.FONT_MEDIUM, nearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
-    		dc.setColor(Gfx.COLOR_PINK, Gfx.COLOR_BLACK);
-    		dc.drawText(width/2, lenght/5 * 4, Gfx.FONT_TINY, nextAfterNearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
-    	} else {
-			dc.setColor(Gfx.COLOR_DK_BLUE, Gfx.COLOR_WHITE);
-    		dc.drawText(width/2, lenght/5, Gfx.FONT_MEDIUM, mTransport, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
-			dc.setColor(Gfx.COLOR_DK_RED, Gfx.COLOR_TRANSPARENT);
-    		dc.drawText(width/2, lenght/5 * 2, Gfx.FONT_TINY, prevDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
-    		dc.setColor(Gfx.COLOR_DK_GREEN, Gfx.COLOR_TRANSPARENT);
-    		dc.drawText(width/2, lenght/5 * 3, Gfx.FONT_MEDIUM, nearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
-    		dc.setColor(Gfx.COLOR_PURPLE, Gfx.COLOR_TRANSPARENT);
-    		dc.drawText(width/2, lenght/5 * 4, Gfx.FONT_TINY, nextAfterNearestDeparture, Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER);
-    	}
-    }
-
-    //! Called when this View is removed from the screen. Save the
-    //! state of your app here.
-    function onHide() {
-    }
-
-	function onTransport(transport) {
-		mTransport = transport.route[:name];
-		prevDeparture = Lang.format("Previous: $1$", [transport.departureTime[0]]);
-		nearestDeparture = Lang.format("NOW: $1$", [transport.departureTime[1]]);
-		if (transport.departureTime[2] == null)
-		{
-			nextAfterNearestDeparture = "";
-		} else {
-			nextAfterNearestDeparture = Lang.format("Next: $1$", [transport.departureTime[2]]);
-		}
-		
-		Ui.requestUpdate();
-	}
 }
